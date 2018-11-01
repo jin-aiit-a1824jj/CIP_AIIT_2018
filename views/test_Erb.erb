@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<ul>
+
+<li>List!</li>
+
+</ul>
+
+
+<ul>
+  <% for r in @raw do %>
+    <li>
+      <label> <%= r["name"] %>, <%= r["cpu"] %>, <%= r["memory"] %>, <%= r["state"] %> </label>
+    </li>
+  <% end %>
+</ul>
