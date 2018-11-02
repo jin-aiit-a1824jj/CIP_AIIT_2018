@@ -1,16 +1,56 @@
 <!DOCTYPE html>
 
-<ul>
+<style>
+  table {
+<!--    width: 100%; -->
+    border: 1px solid #444444;
+  }
+  
+  th, td {
+    border: 1px solid #444444;
+    text-align: center
+  }
 
-<li>List!</li>
+  form { 
+    float: left; 
+  } 
+</style>
 
-</ul>
+<table>
+  <caption>virsh list</caption>
+  <thead>
+        <tr>
+          <th>domain name</th>
+          <th>vcpu</th>
+          <th>memory</th>
+          <th>state</th>
+          <th>state_change</th>
+	</tr>
+  </thead>
 
+  <% for r in @raw do %> 
+  <tbody>
+    <tr>
+      <td><%= r["name"] %></td>
+      <td><%= r["cpu"] %></td>
+      <td><%= r["memory"] %> Gib</td>
+      <td><%= r["state"] %> </td>
+      <td>
+	<form method="POST" action="/vm-do/start/<%= r["name"] %>">
+	  <input type="submit" value="開始">  
+	</form>
+	<form method="POST" action="/vm-do/shutdown/<%= r["name"] %>">
+          <input type="submit" value="停止">
+        </form>
+	<form method="POST" action="/vm-do/reboot/<%= r["name"] %>">
+          <input type="submit" value="再起動">
+        </form>
+	<form method="POST" action="/vm-do/destroy/<%= r["name"] %>">
+          <input type="submit" value="削除">
+        </form>
+     </td>
+    </tr>
+  </tbody>
 
-<ul>
-  <% for r in @raw do %>
-    <li>
-      <label> <%= r["name"] %>, <%= r["cpu"] %>, <%= r["memory"] %>, <%= r["state"] %> </label>
-    </li>
   <% end %>
-</ul>
+</table>
