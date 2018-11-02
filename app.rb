@@ -135,10 +135,11 @@ get "/func4" do
     data = {"data" => []}
     
     conn = Libvirt::open("qemu:///system")
+
     conn.list_domains.each do |domain|
       vm = conn.lookup_domain_by_id(domain)
-      puts "name: #{vm.name}\n"  
-      puts "state: #{vm.info.state}:#{domainState_toString(vm.info.state)}, memory:  #{vm.info.memory/1024/1024}, cpu_num: #{vm.info.nr_virt_cpu}\n"
+     #  puts "name: #{vm.name}\n"  
+     #  puts "state: #{vm.info.state}:#{domainState_toString(vm.info.state)}, memory:  #{vm.info.memory/1024/1024}, cpu_num: #{vm.info.nr_virt_cpu}\n"
     
       e = {"name" => vm.name,
            "state" => domainState_toString(vm.info.state),
@@ -147,6 +148,20 @@ get "/func4" do
       
       data["data"].push(e)
     end
+
+    conn.list_defined_domains.each do |domain|
+      vm = conn.lookup_domain_by_name(domain)
+     #  puts "name: #{vm.name}\n"                                                                                                                                                                                                                                
+     #  puts "state: #{vm.info.state}:#{domainState_toString(vm.info.state)}, memory:  #{vm.info.memory/1024/1024}, cpu_num: #{vm.info.nr_virt_cpu}\n"                                                                                                            
+      e = {"name" => vm.name,
+           "state" => domainState_toString(vm.info.state),
+           "memory" => vm.info.memory/1024/1024,
+           "cpu" => vm.info.nr_virt_cpu}
+
+      data["data"].push(e)
+    end
+
+
     conn.close
     data.to_json
     
@@ -157,3 +172,34 @@ get "/func4" do
 
 end
 
+post "/vm-do/:cmd/:vm_name" do
+  
+  cmd = "#{params['cmd']}"
+  vm_name = "#{params['vm_name']}"
+  conn = Libvirt::open("qemu:///system")
+  
+  begin
+      vm = conn.lookup_domain_by_name(vm_name)
+      puts "/vm-do/#{params['cmd']}/#{vm.name}\n"
+      
+        case cmd
+          when "start"
+              puts "vm.start"
+          when "shutdown"
+              puts "vm.shutdown"
+          when "reboot"
+              puts "vm.reboot"
+          when "destroy"
+              puts "vm.destroy"
+          else
+              puts "#{vm}"
+        end
+
+ rescue Libvirt::Error => e
+ end
+ 
+ conn.close
+ 
+ sleep(5)
+ redirect "/func4"
+end
