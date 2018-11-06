@@ -15,8 +15,18 @@ begin
       vm.destroy
     end
  end
+
+ #
+ sleep(10)
+
+ pool = conn.lookup_storage_pool_by_name("kvm_centos7") 
+ vol = pool.lookup_volume_by_name(vm_name + ".qcow2")
+ vol.delete
+ 
+ pool.refresh
+ 
  conn.close
 
 rescue Livbirt::Error => e
-
+  puts e
 end
