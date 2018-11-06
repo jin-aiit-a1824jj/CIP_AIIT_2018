@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # app.rb
 require 'sinatra'
 require 'sinatra/base'
@@ -6,6 +7,19 @@ require 'json'
 require 'open3'
 require 'sinatra/reloader'
 require 'libvirt'
+
+require 'active_record'
+require 'mysql2'
+
+
+# DB設定ファイルの読み込み
+ActiveRecord::Base.configurations = YAML.load_file('database.yml')
+ActiveRecord::Base.establish_connection(:development)
+
+class Topic < ActiveRecord::Base
+end
+
+
 
 # $stdout.sync = true
 
@@ -184,15 +198,15 @@ post "/vm-do/:cmd/:vm_name" do
       
         case cmd
           when "start"
-              puts "vm.start"
+             # vm.create
           when "shutdown"
-              puts "vm.shutdown"
+             # vm.shutdown(1)
           when "reboot"
-              puts "vm.reboot"
+             # vm.reboot
           when "destroy"
-              puts "vm.destroy"
+             #  vm.destroy
           else
-              puts "#{vm}"
+              puts "wakaranai: #{vm}"
         end
 
  rescue Libvirt::Error => e
@@ -202,4 +216,28 @@ post "/vm-do/:cmd/:vm_name" do
  
  sleep(5)
  redirect "/func4"
+end
+
+# 最新トピック10件分を取得
+get '/topics.json' do
+  content_type :json, :charset => 'utf-8'
+  topics = Topic.order("created_at DESC").limit(10)
+  topics.to_json(:root => false)
+end
+
+# トピック投稿
+post '/topic' do
+  # リクエスト解析
+  reqData = JSON.parse(request.body.read.to_s) 
+  title = reqData['title']
+  description = reqData['description']
+
+  # データ保存
+  topic = Topic.new
+  topic.title = title
+  topic.description = description
+  topic.save
+
+  # レスポンスコード
+  status 202  
 end
