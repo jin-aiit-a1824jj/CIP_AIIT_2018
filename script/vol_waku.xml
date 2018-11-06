@@ -1,0 +1,29 @@
+<volume type='file'>
+  <name>disk-origin.qcow2</name>
+  <key>/var/kvm/disk/kvm_centos7/disk-origin.qcow2</key>
+  <source>
+  </source>
+  <capacity unit='bytes'>8589934592</capacity>
+  <allocation unit='bytes'>1337954304</allocation>
+  <physical unit='bytes'>8591507456</physical>
+  <target>
+    <path>/var/kvm/disk/kvm_centos7/disk-origin.qcow2</path>
+    <format type='qcow2'/>
+    <permissions>
+      <mode>0600</mode>
+      <owner>107</owner>
+      <group>107</group>
+      <label>system_u:object_r:svirt_image_t:s0:c154,c908</label>
+    </permissions>
+    <timestamps>
+      <atime>1541466705.158156541</atime>
+      <mtime>1541466888.835649161</mtime>
+      <ctime>1541466888.835649161</ctime>
+    </timestamps>
+    <compat>1.1</compat>
+    <features>
+      <lazy_refcounts/>
+    </features>
+  </target>
+</volume>
+
