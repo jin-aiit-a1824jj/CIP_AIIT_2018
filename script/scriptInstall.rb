@@ -16,24 +16,24 @@ puts "Input VM CPU number:"
 vm_cpu_number = gets
 # p vm_cpu_num_ber.chomp!
 
-puts "Input VM MEMORY number:"
+puts "Input VM MEMORY number: Unit=Kib ex)1GB = 1048576KB"
 vm_memory = gets
 
 #原本ファイルのパス指定 -domain xml edit
 xml = File.expand_path(File.dirname(__FILE__)) + "/moto.xml"
 doc = REXML::Document.new(open(xml).read)
 
-#
+#新しい名前更新
 element_name = doc.elements['domain/name']
 element_name.text = nil
 element_name.add_text(vm_name.chomp!)
        
-#
+#新しいUUID更新
 element_uuid = doc.elements['domain/uuid']
 element_uuid.text = nil
 element_uuid.add_text(SecureRandom.uuid)
 
-#
+#新しいmemory更新
 element_memory = doc.elements["domain/memory unit='KiB'"]
 element_memory.text = nil
 element_memory.add_text(vm_memory.chomp!)
@@ -52,10 +52,20 @@ element_vol = doc.elements['domain/devices/disk/source']
 element_vol.delete_attribute('file')
 element_vol.add_attributes({"file"=>"/var/kvm/disk/kvm_centos7/"+vm_name+".qcow2"})
 
+#新しいmac address                                                                                      
+element_mac = doc.elements['domain/devices/interface/mac']
+element_mac.delete_attribute('address')
+
+# QEMU or KVM                                                                                          
+mac = [0x52, 0x42, 0x00, Random.rand(0x7f), Random.rand(0xff), Random.rand(0xff)]
+n_mac = (["%02x"] * 6).join(":") % mac
+# puts n_mac
+element_mac.add_attributes({"address"=>n_mac})
+
+
 #新しいXMLとして保存
 File.write(vm_name+".xml", doc) 
 # puts vm_name + ".xml"
-
 
 
 # -volume xml edit
@@ -89,17 +99,18 @@ begin
  pool = conn.lookup_storage_pool_by_name("kvm_centos7") 
  clone_moto_vol = pool.lookup_volume_by_name("disk-origin.qcow2")
 
+ puts "cloning volume  Wait a minute~"
  xml = File.expand_path(File.dirname(__FILE__)) + "/vol_"+vm_name+".xml"
  doc = REXML::Document.new(open(xml).read)
  vol = pool.create_volume_xml_from("#{doc}", clone_moto_vol, 0)
- puts "Wait a minute~"
  pool.refresh
  
  conn.create_domain_linux(File.read(File.expand_path(File.dirname(__FILE__)) + "/" + vm_name + ".xml"))
  dom = conn.lookup_domain_by_name(vm_name)
+ sleep(10)
+ dom.reset(0)
  # puts dom.xml_desc 
  
-
  conn.close
 
 rescue Livbirt::Error => e
