@@ -104,16 +104,22 @@ begin
  doc = REXML::Document.new(open(xml).read)
  vol = pool.create_volume_xml_from("#{doc}", clone_moto_vol, 0)
  pool.refresh
- 
+
+ puts "adding new mac address"
+ net = conn.lookup_network_by_name("default")
+ add_host = "<host mac='" + n_mac + "' name='" + vm_name  + "' ip='192.168.122.100' />"
+ net.update(3, 4, -1, add_host, 1)
+
  conn.create_domain_linux(File.read(File.expand_path(File.dirname(__FILE__)) + "/" + vm_name + ".xml"))
  dom = conn.lookup_domain_by_name(vm_name)
+ puts "pending new vm! wait a second~"
  sleep(10)
  dom.reset(0)
  # puts dom.xml_desc 
  
  conn.close
 
-rescue Livbirt::Error => e
+rescue Libvirt::Error => e
 
   puts e
 
