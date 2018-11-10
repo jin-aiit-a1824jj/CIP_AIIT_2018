@@ -4,6 +4,45 @@ require 'rexml/document'
 require 'securerandom'
 require 'libvirt'
 require 'time'
+require 'active_record'
+require 'mysql2'
+
+ActiveRecord::Base.configurations = YAML.load_file('dbyml.yml')
+ActiveRecord::Base.establish_connection(:development)
+
+class List < ActiveRecord::Base
+end
+
+@ip_under3 = []
+
+def push_add_ip_to_ip_under3()
+ List.all.each do |d|
+  v = d.vm_ip.from(12)
+  #puts v
+  @ip_under3.push(v.to_i)
+ end
+end
+
+def leases_net_ip(name, cpu, memory, mac_addr)
+ under3 = 0
+ while true do
+   under3 = rand(2..254)
+   if(@ip_under3.find{ |v| v == under3 } == nil)
+     break
+   end
+ end
+ @ip_under3.push(under3)
+
+ data = List.new
+ data.vm_name = name
+ data.vm_cpu = cpu.to_i
+ data.vm_memory = memory.to_i
+ data.vm_mac_addr = mac_addr
+ data.vm_ip = "192.168.122." + under3.to_s
+ data.save
+end
+
+#以下がmainコード
 
 #画面をきれいに
 system "clear"
@@ -91,6 +130,10 @@ element_target_path.add_text("/var/kvm/disk/kvm_centos7/"+ vm_name +".qcow2")
 File.write("vol_"+vm_name+".xml", doc)
 #puts "vol_" +  vm_name + ".xml"
 
+#新しいIPを振り分けの支度
+push_add_ip_to_ip_under3()
+leases_net_ip(vm_name, vm_cpu_number.to_i, vm_memory.to_i, n_mac)
+
 #
 begin
 
@@ -107,7 +150,8 @@ begin
 
  puts "adding new mac address"
  net = conn.lookup_network_by_name("default")
- add_host = "<host mac='" + n_mac + "' name='" + vm_name  + "' ip='192.168.122.100' />"
+ add_host = "<host mac='" + n_mac + "' name='" + vm_name  + "' ip='192.168.122." + @ip_under3.last.to_s + "' />"
+ puts add_host
  net.update(3, 4, -1, add_host, 1)
 
  conn.create_domain_linux(File.read(File.expand_path(File.dirname(__FILE__)) + "/" + vm_name + ".xml"))

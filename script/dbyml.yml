@@ -1,0 +1,7 @@
+development:
+  adapter: mysql2
+  database: vm_list
+  host: localhost
+  username: root
+  password: Admin1mysql!
+  encoding: utf8
