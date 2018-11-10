@@ -1,5 +1,30 @@
+#-*- coding: utf-8 -*-
+
 require 'libvirt'
 require 'rexml/document'
+require 'active_record'
+require 'mysql2'
+
+ActiveRecord::Base.configurations = YAML.load_file('dbyml.yml')
+ActiveRecord::Base.establish_connection(:development)
+
+class List < ActiveRecord::Base
+end
+
+@ip = ""
+
+def remove_db(name)
+ data = List.find_by(vm_name: name)
+ if(data != nil)
+   @ip = data.vm_ip
+   data.destroy
+ end
+end
+
+#以下がmainコード
+
+#画面をきれいに                                                                                        
+system "clear"
 
 puts "Input VM name:"
 vm_name = gets
@@ -30,15 +55,25 @@ begin
  pool.refresh
  
  #
- puts "removing dchp ip"
- net = conn.lookup_network_by_name("default")
- add_host = "<host mac='" + mac_addr + "' name='" + vm_name  + "' ip='192.168.122.100' />"
- net.update(2, 4, -1, add_host, 1) 
- sleep(10)
+ puts "removing DB"
+ remove_db(vm_name) 
 
  #
+ puts "removing dchp ip"
+ net = conn.lookup_network_by_name("default")
+ #puts net.xml_desc(0)
+ 
+ rhost = "<host mac='" + mac_addr[0].to_s + "' name='" + "#{vm_name}" + "' ip='" + "#{@ip}" + "' />"
+ puts rhost
+ net.update(2, 4, -1, rhost, 1) 
+ 
+ #
  conn.close
+ # sleep(10)
  puts "remove vm complete!"
+ 
 rescue Livbirt::Error => e
+
   puts e
+
 end
