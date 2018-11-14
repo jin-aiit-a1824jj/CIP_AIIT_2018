@@ -1,123 +1,21 @@
 # -*- coding: utf-8 -*-
-# app.rb
+
 require 'sinatra'
 require 'sinatra/base'
 require 'json'
-# require 'sudo'
-require 'open3'
 require 'sinatra/reloader'
 require 'libvirt'
 
-require 'active_record'
-require 'mysql2'
+require File.expand_path(File.dirname(__FILE__) + '/script/scriptInstall.rb')
+require File.expand_path(File.dirname(__FILE__) + '/script/scriptAdd_User_PUB.rb')
 
+$vm_name_init_only = ""
 
-# DB設定ファイルの読み込み
-ActiveRecord::Base.configurations = YAML.load_file('database.yml')
-ActiveRecord::Base.establish_connection(:development)
-
-class Topic < ActiveRecord::Base
-end
-
-
-
-# $stdout.sync = true
-
+#タイトル画面（偽装）
 get '/' do
    redirect to("test_static_page.html")
 end
 
-get '/this' do
-  'Hello world! this!'
-  article = {
-      id: 1,
-      title: "today's dialy",
-      content: "It's a sunny day."
-  }
- 
-  article.to_json
-
-end
-
-get '/func1' do
-  result = open("| ps")
-
-  #print result.class # => IO
-  
-  data = {"data" => []}
-
-  while !result.eof
-   puts "#{result.gets}"
-   e = {"value" => result.gets}
-   data["data"].push(e)
-  end
-
-  result.close
-  data.to_json
-end
-
-def func(cmd)
-  puts "#{cmd}" 
-end
-
-get "/func2/:cmd" do
-"Hello!"
-# "#{params['cmd']}"
-conn = Libvirt::open("qemu:///system")
-puts conn.list_domains
-
-
-# puts conn.capabilities
-# "#{conn}"
-
-#conn.list_defined_domains.each{|dom_name|
-#    vm = conn.lookup_domain_by_name(dom_name)
-#    puts "#{vm.name}"
-#}
-
-# dom = conn.lookup_domain_by_name("kvm_centos7")
-#puts dom
-# "#{dom.name}\n"
-# "#{dom.job_info}\n"
-# dom.info
-# File.expand_path(File.dirname(__FILE__)) + "/public/test.sh"
-# "sudo -S virsh list"
-
-#Open3.popen3(File.expand_path(File.dirname(__FILE__)) + "/public/test.sh") do |i, o, e, w|
-#    o.each do |line| puts "#{"stdout:" + line}" end
-#    o.close
-
-#    e.each do |line| puts "#{"error:" + line}" end
-#    e.close
-#end
-
-#/var/www/test_sinatra/public/test.sh  
-
-# func("#{params['cmd']}")
-# result = open(command)
-# data = {"data" => []}
- 
-# while !result.eof
-#   puts "#{result.gets}"
-#   e = {"value" => result.gets}
-#   data["data"].push(e)
-#  end
-
-#  result.close 
-#  data.go_json
- 
-end
-
-
-class Stream
-  def each
-    100.times { |i| yield "#{i}\n" }
-  end
-end
-
-get "/func3" do
-  Stream.new
-end
 
 def domainState_toString(flag)
   case flag
@@ -144,7 +42,8 @@ def domainState_toString(flag)
   end
 end
 
-get "/func4" do
+#Vmの状態を呼ぶ
+get "/func_vm_status" do
   begin
     data = {"data" => []}
     
@@ -158,15 +57,15 @@ get "/func4" do
       e = {"name" => vm.name,
            "state" => domainState_toString(vm.info.state),
            "memory" => vm.info.memory/1024/1024,
-           "cpu" => vm.info.nr_virt_cpu}
-      
+           "cpu" => vm.info.nr_virt_cpu}   
       data["data"].push(e)
     end
 
     conn.list_defined_domains.each do |domain|
       vm = conn.lookup_domain_by_name(domain)
-     #  puts "name: #{vm.name}\n"                                                                                                                                                                                                                                
-     #  puts "state: #{vm.info.state}:#{domainState_toString(vm.info.state)}, memory:  #{vm.info.memory/1024/1024}, cpu_num: #{vm.info.nr_virt_cpu}\n"                                                                                                            
+     #  puts "name: #{vm.name}\n"
+     #  puts "state: #{vm.info.state}:#{domainState_toString(vm.info.state)}, memory:  #{vm.info.memory/1024/1024}, cpu_num: #{vm.info.nr_virt_cpu}\n"                                                                          
+
       e = {"name" => vm.name,
            "state" => domainState_toString(vm.info.state),
            "memory" => vm.info.memory/1024/1024,
@@ -215,9 +114,47 @@ post "/vm-do/:cmd/:vm_name" do
  conn.close
  
  sleep(5)
- redirect "/func4"
+ redirect "/func_vm_status"
 end
 
+get '/new_vm_form' do
+
+end
+
+
+#新しいVM起動させる
+post '/new_vm' do
+
+   reqData = JSON.parse(request.body.read.to_s) 
+   $vm_name_init_only = reqData['vm_name']
+   vm_name = reqData['vm_name']
+   vm_cpu = reqData['vm_cpu']
+   vm_memory = reqData['vm_memory']  
+
+   New_Vm.Make_New_Vm(vm_name, vm_cpu, vm_memory)
+   puts "vm_cloning is over"
+  
+   sleep(30)
+   New_Pub.Make_new_pub(vm_name)
+   puts "vm_publickey_generate_over!"
+
+    status 202
+  # redirect "/func_vm_status"
+  # call env.merge('PATH_INFO' => '/new_pub') 
+end
+
+post '/new_pub' do
+  
+   New_Pub.Make_new_pub($vm_name_init_only)
+   puts "vm_publickey_generate_over!"
+
+   status 202
+end
+
+
+
+
+=begin
 # 最新トピック10件分を取得
 get '/topics.json' do
   content_type :json, :charset => 'utf-8'
@@ -233,11 +170,12 @@ post '/topic' do
   description = reqData['description']
 
   # データ保存
-  topic = Topic.new
-  topic.title = title
-  topic.description = description
-  topic.save
+  # topic = Topic.new
+  # topic.title = title
+  # topic.description = description
+  # topic.save
 
   # レスポンスコード
   status 202  
 end
+=end
