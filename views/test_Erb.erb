@@ -37,16 +37,10 @@
       <td><%= r["memory"] %> Gib</td>
       <td><%= r["state"] %> </td>
       <td>
-	<form method="POST" action="/vm-do/start/<%= r["name"] %>">
-	  <input type="submit" value="開始">  
-	</form>
-	<form method="POST" action="/vm-do/shutdown/<%= r["name"] %>">
-          <input type="submit" value="停止">
-        </form>
 	<form method="POST" action="/vm-do/reboot/<%= r["name"] %>">
           <input type="submit" value="再起動">
         </form>
-	<form method="POST" action="/vm-do/destroy/<%= r["name"] %>">
+	<form method="POST" action="/delete_vm/<%= r["name"] %>">
           <input type="submit" value="削除">
         </form>
      </td>
@@ -56,8 +50,22 @@
   <% end %>
 </table>
 
+<br>
+<br>
 
+ <form method="GET" action="/new_vm_form">
+      <input type="submit" value="新しいVM作る。。。">
+ </form>
+
+
+<br>
+<br>
 <textarea cols="50" rows="5">
+落書き。。。
+新しいVMを起動するのに必要な想定時間はおよそ120秒。。。
+もし、出来なかったらバグです。。。
+連続クリックはよろしくありません。。。
+
 開始：start
 停止：shutdown
 再起動：reboot

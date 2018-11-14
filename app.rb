@@ -175,10 +175,9 @@ get '/test_param2' do
   redirect "/new_vm_result?test=#{params["test"]}"
 end
 
-post '/delete_vm' do
+post '/delete_vm/:vm_name' do
 
-   reqData = JSON.parse(request.body.read.to_s)
-   vm_name = reqData['vm_name']
+   vm_name = "#{params['vm_name']}"
 
    Delete_vm.Remove_vm(vm_name)
    puts "delete_vm_over!"
