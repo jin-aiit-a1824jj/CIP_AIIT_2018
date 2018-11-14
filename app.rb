@@ -8,8 +8,7 @@ require 'libvirt'
 
 require File.expand_path(File.dirname(__FILE__) + '/script/scriptInstall.rb')
 require File.expand_path(File.dirname(__FILE__) + '/script/scriptAdd_User_PUB.rb')
-
-$vm_name_init_only = ""
+require File.expand_path(File.dirname(__FILE__) + '/script/scriptRemove.rb')
 
 #タイトル画面（偽装）
 get '/' do
@@ -126,7 +125,6 @@ end
 post '/new_vm' do
 
    reqData = JSON.parse(request.body.read.to_s) 
-   $vm_name_init_only = reqData['vm_name']
    vm_name = reqData['vm_name']
    vm_cpu = reqData['vm_cpu']
    vm_memory = reqData['vm_memory']  
@@ -134,21 +132,27 @@ post '/new_vm' do
    New_Vm.Make_New_Vm(vm_name, vm_cpu, vm_memory)
    puts "vm_cloning is over"
   
+   #vmが立ち上がることを待つ
    sleep(30)
+  
    New_Pub.Make_new_pub(vm_name)
    puts "vm_publickey_generate_over!"
 
-    status 202
-  # redirect "/func_vm_status"
+   status 202
+   redirect "/func_vm_status"
   # call env.merge('PATH_INFO' => '/new_pub') 
 end
 
-post '/new_pub' do
-  
-   New_Pub.Make_new_pub($vm_name_init_only)
-   puts "vm_publickey_generate_over!"
+post '/delete_vm' do
+
+   reqData = JSON.parse(request.body.read.to_s)
+   vm_name = reqData['vm_name']
+
+   Delete_vm.Remove_vm(vm_name)
+   puts "delete_vm_over!"
 
    status 202
+   redirect "func_vm_status"
 end
 
 
