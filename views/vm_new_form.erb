@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<section class="content">
+  <h1 class="content__heading">新しいVMを立上げる。。。</h1>
+  <p class="content__lede">それぞれの項目に適切な値を入力してください。。。</p>
+
+  <form class="content__form contact-form" action="/new_vm" method="post">
+
+    <div class="contact-form__input-group">
+      <label class="contact-form__label" for="vm_name"> VMの名前</label>
+      <input class="contact-form__input contact-form__input--text" id="vm_name" name="vm_name" type="text"/>
+      <label class="contact-form__label" for="vm_name_ex">ex） VM-test など</label>
+    </div>
+
+    <div class="contact-form__input-group">
+      <label class="contact-form__label" for="vm_cpu">CPUの個数</label>
+      <input class="contact-form__input contact-form__input--email" id="vm_cpu" name="vm_cpu" type="text"/>
+      <label class="contact-form__label" for="vm_cpu_ex">ex） 2 など</label>
+    </div>
+
+     <div class="contact-form__input-group">
+      <label class="contact-form__label" for="vm_memory">RAMの容量</label>
+      <input class="contact-form__input contact-form__input--text" id="vm_memory" name="vm_memory" type="text"/>
+      <label class="contact-form__label" for="vm_memory_ex">ex）Unit=Kib ex)1GB = 1048576KB</label>
+     </div>
+
+     <button class="contact-form__button" type="submit" >開始!</button>
+       
+  </form>
+
+</section>

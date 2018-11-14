@@ -117,17 +117,29 @@ post "/vm-do/:cmd/:vm_name" do
 end
 
 get '/new_vm_form' do
+  erb :vm_new_form
+end
 
+post '/test_param' do
+  params
+  puts params["vm_name"]
+  puts params["vm_cpu"]
+  puts params["vm_memory"]
+  status 200
 end
 
 
 #新しいVM起動させる
 post '/new_vm' do
 
-   reqData = JSON.parse(request.body.read.to_s) 
-   vm_name = reqData['vm_name']
-   vm_cpu = reqData['vm_cpu']
-   vm_memory = reqData['vm_memory']  
+#   reqData = JSON.parse(request.body.read.to_s) 
+#   vm_name = reqData['vm_name']
+#   vm_cpu = reqData['vm_cpu']
+#   vm_memory = reqData['vm_memory']  
+
+   vm_name =  params["vm_name"]
+   vm_cpu = params["vm_cpu"]
+   vm_memory =  params["vm_memory"]
 
    New_Vm.Make_New_Vm(vm_name, vm_cpu, vm_memory)
    puts "vm_cloning is over"

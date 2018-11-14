@@ -29,6 +29,7 @@
   </thead>
 
   <% for r in @raw do %> 
+     <% if (r["name"] == "kvm_centos7-origin") then next end %>
   <tbody>
     <tr>
       <td><%= r["name"] %></td>
@@ -54,3 +55,11 @@
 
   <% end %>
 </table>
+
+
+<textarea cols="50" rows="5">
+開始：start
+停止：shutdown
+再起動：reboot
+削除：destroy
+</textarea>
