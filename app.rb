@@ -9,6 +9,7 @@ require 'libvirt'
 require File.expand_path(File.dirname(__FILE__) + '/script/scriptInstall.rb')
 require File.expand_path(File.dirname(__FILE__) + '/script/scriptAdd_User_PUB.rb')
 require File.expand_path(File.dirname(__FILE__) + '/script/scriptRemove.rb')
+require File.expand_path(File.dirname(__FILE__) + '/script/scriptSearchDB.rb')
 
 #タイトル画面（偽装）
 get '/' do
@@ -150,9 +151,28 @@ post '/new_vm' do
    New_Pub.Make_new_pub(vm_name)
    puts "vm_publickey_generate_over!"
 
-   status 202
-   redirect "/func_vm_status"
-  # call env.merge('PATH_INFO' => '/new_pub') 
+   redirect "/new_vm_result?vm_name=#{vm_name}"
+
+   # status 202
+   # redirect "/func_vm_status"
+   # call env.merge('PATH_INFO' => '/new_pub') 
+end
+
+get '/new_vm_result' do
+  
+   data = Find_vm_data.Get_data(params["vm_name"])
+
+   @vm_name = data.vm_name
+   @vm_cpu = data.vm_cpu
+   @vm_memory = data.vm_memory
+   @vm_ip = data.vm_ip
+   # @raw = ""
+
+   erb :vm_new_result
+end
+
+get '/test_param2' do
+  redirect "/new_vm_result?test=#{params["test"]}"
 end
 
 post '/delete_vm' do

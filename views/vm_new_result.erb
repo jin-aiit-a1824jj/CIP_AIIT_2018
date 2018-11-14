@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<section class="content">
+  <h1 class="content__heading">新しいVMの準備が整えました！</h1>
+  <p class="content__lede">コピペで、接続ができるはずです。。。</p>
+
+  <form class="content__form contact-form" action="/func_vm_status" method="get">
+
+    <div class="contact-form__input-group">
+      <label class="contact-form__label">VMの名前： <%= @vm_name %></label>
+    </div> 
+   
+    <div class="contact-form__input-group">
+      <label class="contact-form__label">CPUの個数： <%= @vm_cpu %></label>
+    </div>
+
+    <div class="contact-form__input-group">
+      <label class="contact-form__label">RAMの容量： <%= @vm_memory %> Kib </label>
+    </div>
+
+    <div class="contact-form__input-group">
+      <label class="contact-form__label">割り当てされたIP： <%= @vm_ip %></label>
+    </div>
+
+    <br>
+    <br>
+    <br>
+
+    <div> <label class="contact-form__label">接続方法</label> </div>
+    <div> <label class="contact-form__label">sudo ssh <%= @vm_name %>@<%= @vm_ip %> -i /var/www/test_sinatra/public/<%= @vm_name %>-access-key </label> </div>
+    
+    <br>
+    <br>
+
+    <div> <label class="">Enter passphrase for key '/var/www/test_sinatra/public/<%= @vm_name %>-access-key':12345  </label> </div>  
+    
+    <br>
+    <br>
+
+    <button class="contact-form__button" type="submit" >確認</button>
+
+  </form>
+
+</section>
