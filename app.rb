@@ -101,7 +101,7 @@ post "/vm-do/:cmd/:vm_name" do
           when "shutdown"
              # vm.shutdown(1)
           when "reboot"
-             # vm.reboot
+              vm.reset
           when "destroy"
              #  vm.destroy
           else
